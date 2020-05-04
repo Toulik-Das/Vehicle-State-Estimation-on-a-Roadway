@@ -25,7 +25,7 @@ Well, we've already touched on sensor fusion and calibration, but we'll also nee
 
 If we have a car like the autonomous that's equipped with a number of different sensors, what we would like to do is figure out how to combine all of this different information to get the best possible estimate of the vehicle state. It might seem like a daunting task to fuse all of this data, but in fact, we already have the tools to do this. In lesson two of this module, we'll discuss exactly how we can use the familiar tools like the extended Kalman filter to combine all of the sensor data into a single consistent estimate of the vehicle state. But in order to do sensor fusion, we first need to know some things about our sensors and how they're configured on board the vehicle. 
 
-![1557366753482](assets/1557366753482.png)
+![1557366753482](https://user-images.githubusercontent.com/39211262/80966773-c30adf00-8e32-11ea-9e45-3d74ba560954.png)
 
 For one thing, our sensor models might depend on parameters that are specific to the car or to the sensor itself. A good example of this is using wheel encoders to measure the forward speed of the car. A wheel encoder measures the angular velocity of the axle. But if we want to use that to get the forward velocity of the vehicle, we also need to know the radius of a tire. Another thing we need to know about the vehicle is the pose or position and orientation of each sensor relative to the vehicle reference frame. Because we're combining information from sensors located in different places, we need to know how to transform all of the measurements so they're expressed in a common reference frame. Finally, we need to think about how well our sensor measurements are synchronized so that we can fuse them all properly. 
 
@@ -37,7 +37,8 @@ Intuitively, you might expect that directly combining a LiDAR scan you just rece
 
 How accurate does a estimator need to be for a self-driving car to drive safely on the road? Well, it depends on the size of the car, the width of the lanes, and the density of traffic, but to get a ballpark estimate, you might consider the margin of error available for a task leak lane keeping. 
 
-![1557366896981](assets/1557366896981.png)
+
+![1557366896981](https://user-images.githubusercontent.com/39211262/80966819-e170da80-8e32-11ea-8657-6ee1534b7317.png)
 
 A typical car is about 1.8 meters wide, an average highway lane might be about three meters wide, give or take. So, our estimator would need to be good enough to position the car within 60 centimeters or so on either side of the lane. That's assuming we know exactly where the lanes are and that there's no traffic. For comparison, an optimistic range for GPS accuracy is between one and five meters depending on the specific hardware, the number of satellites that are visible, and other factors. So, clearly, GPS alone is not enough even for lane keeping. This is one important reason why we'll need to combine information from many different sensors. 
 
@@ -73,7 +74,7 @@ Welcome back. Now that we've discussed the basic hardware and software that we'l
 
 Although we'll make some simplifications, the basic structure of our pipeline will resemble one used in modern self-driving vehicles. Before we dive into the algorithm details, it's always useful to take a step back and ask, "Why use these sensors and can we do something more simple?" In our case, we'll be using an IMU with a GNSS receiver and a LIDAR for several reasons. 
 
-![1557367518842](assets/1557367518842.png)
+![1557367518842](https://user-images.githubusercontent.com/39211262/80966860-f64d6e00-8e32-11ea-9abe-89c69d68a467.png)
 
 First, whenever we fuse information for the purpose of state estimation, one important factor to consider is whether or not the errors from different sensors will be correlated. In other words, if one fails is the other likely to fail as well. In this case, all three
 of our sensors use different measurement methods and are unlikely to fail for the same reason. 
@@ -96,7 +97,7 @@ In a loosely coupled system, we assume that this data has already been preproces
 
 Here you can see a graphical representation of our system. 
 
-![1557383567405](assets/1557383567405.png)
+![1557367551669](https://user-images.githubusercontent.com/39211262/80966890-07967a80-8e33-11ea-97cf-a165e42bcaa4.png)
 
 We'll use the IMU measurements as noisy inputs to our motion model. This will give us our predicted state which will update every time we have an IMU measurement, this can happen hundreds of times a second. At a much slower rate, we'll incorporate GNSS and LIDAR measurements whenever they become available, say once a second or slower, and use them to correct our predicted state. So, what is our state? 
 
@@ -106,7 +107,8 @@ $$
 $$
 We'll assume that IMU outputs specific forces and rotational rates in the sensor frame and combine them into a single input vector u. It's also important to point out that we're not going to track accelerometer or gyroscope biases. These are often put into the state vector, estimated, and then subtracted off of the our IMU measurements. 
 
-![1557383710622](assets/1557383710622.png)
+
+![1557383567405](https://user-images.githubusercontent.com/39211262/80966932-1f6dfe80-8e33-11ea-8b7b-3848397feefc.png)
 
 For clarity, we'll emit them here and assume our IMU measurements are unbiased. 
 
